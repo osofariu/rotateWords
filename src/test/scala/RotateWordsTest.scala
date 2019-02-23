@@ -3,9 +3,31 @@ import org.scalatest.{Matchers, path}
 class RotateWordsTest extends path.FunSpec with Matchers {
 
   describe("words containing the same letters") {
+    val groupedWords = RotateWords("Tokyo", "Kyoto", "Paris", "Rapis")
 
-    it("group words with same letters") {
-      RotateWords.matchWords("Tokyo", "Kyoto", "Paris").length shouldBe(2)
+    describe("ignoring order of letters") {
+
+      it("group words with same letters finds groups") {
+        groupedWords.getGroupByLetters("Tokyo").get shouldEqual List("Tokyo", "Kyoto")
+        groupedWords.getGroupByLetters("Paris").get shouldEqual List("Paris", "Rapis")
+        groupedWords.getGroupByLetters("Rapis").get shouldEqual List("Paris", "Rapis")
+
+      }
+
+      it("group words with same letters doesnt find words not in original list") {
+        groupedWords.getGroupByLetters("tokyor").isEmpty shouldBe true
+      }
+    }
+
+    describe("taking into account the order of the letters") {
+
+      it("group words with same letters finds groups of two") {
+        groupedWords.getGroupByRotation("Tokyo").get.toSet shouldEqual Set("Tokyo", "Kyoto")
+      }
+
+      it("group words with same letters finds only words with same rotation") {
+        groupedWords.getGroupByRotation("Paris").get.toSet shouldEqual Set("Paris")
+      }
     }
 
     describe("words that are rotated versions") {
@@ -22,7 +44,7 @@ class RotateWordsTest extends path.FunSpec with Matchers {
 
   describe("rotate") {
     it("rotates tokyo by 1") {
-      RotateWords.rotateWord("tokyo", 1) shouldEqual("okyot")
+      RotateWords.rotateWord("tokyo", 1) shouldEqual "okyot"
     }
   }
 }
