@@ -8,14 +8,14 @@ class RotateWordsTest extends path.FunSpec with Matchers {
     describe("ignoring order of letters") {
 
       it("group words with same letters finds groups") {
-        groupedWords.getGroupByLetters("Tokyo").get shouldEqual List("Tokyo", "Kyoto")
-        groupedWords.getGroupByLetters("Paris").get shouldEqual List("Paris", "Rapis")
-        groupedWords.getGroupByLetters("Rapis").get shouldEqual List("Paris", "Rapis")
+        groupedWords.groupBySameLetters("Tokyo").get shouldEqual List("Tokyo", "Kyoto")
+        groupedWords.groupBySameLetters("Paris").get shouldEqual List("Paris", "Rapis")
+        groupedWords.groupBySameLetters("Rapis").get shouldEqual List("Paris", "Rapis")
 
       }
 
       it("group words with same letters doesnt find words not in original list") {
-        groupedWords.getGroupByLetters("tokyor").isEmpty shouldBe true
+        groupedWords.groupBySameLetters("tokyor").isEmpty shouldBe true
       }
     }
 

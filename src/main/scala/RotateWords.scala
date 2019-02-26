@@ -1,46 +1,56 @@
+import RotateWords.makeKey
 
 class RotateWords(words: List[String]) {
 
-  private val wordsByKey: Map[Set[Char], List[String]] = RotateWords.groupByLetters(words)
-
-  def getGroupByLetters(letters: String): Option[Seq[String]] = {
-    wordsByKey.get(RotateWords.makeKey(letters))
+  def groupBySameLetters(letters: String): Option[Seq[String]] = {
+    groupByLetters.get(RotateWords.makeKey(letters))
   }
 
-  def getGroupByRotation(letters: String): Option[Seq[String]] = {
-    val res = getGroupByLetters(letters)
-      .map((seq: Seq[String]) => {
-        seq.foldLeft(Seq[Seq[String]]())((acc, word) => {
-            val accWithWordMaybe :Seq[Seq[String]]= acc.map((grouped: Seq[String]) => {
-              if (RotateWords.matchRotation(grouped.head, word)) {
-                 word +: grouped
-              } else {
-                grouped
-              }
-            })
-            if (!accWithWordMaybe.flatten.contains(word)) {
-              Seq(word) +: accWithWordMaybe
-            } else {
-              accWithWordMaybe
-          }
-        })
-      })
-    res.map((ss: Seq[Seq[String]]) => {
-      ss.filter(s => s.contains(letters))
+  def getGroupByRotation(word: String): Option[Seq[String]] = {
+    val groups = buildGroupsByRotation(word)
+      groups.map((ss: Seq[Seq[String]]) => {
+      ss.filter(s => s.contains(word))
     }).get.headOption
   }
-}
 
+  private def buildGroupsByRotation(word: String): Option[Seq[Seq[String]]] = {
+    def addWordToMatchingGroup(acc: Seq[Seq[String]], word: String): Seq[Seq[String]] = {
+      acc.map(group => {
+        if (RotateWords.matchRotation(group.head, word)) {
+          word +: group
+        } else {
+          group
+        }
+      })
+    }
+
+    def addWordToOwnGroupIfNotMatched(withGroupIfMatched: Seq[Seq[String]], word: String): Seq[Seq[String]] = {
+      if (!withGroupIfMatched.flatten.contains(word)) {
+        Seq(word) +: withGroupIfMatched
+      } else {
+        withGroupIfMatched
+      }
+    }
+
+    groupBySameLetters(word)
+      .map((wordsWithSameLetters: Seq[String]) => {
+        wordsWithSameLetters.foldLeft(Seq[Seq[String]]())((acc, word) => {
+          val withGroupIfMatched = addWordToMatchingGroup(acc, word)
+          addWordToOwnGroupIfNotMatched(withGroupIfMatched, word)
+        })
+      })
+  }
+
+  private def groupByLetters: Map[Set[Char], List[String]] = {
+    words.groupBy(makeKey)
+  }
+}
 
 object RotateWords {
   def apply(words: List[String]): RotateWords = new RotateWords(words)
   def apply(words: String*): RotateWords = RotateWords(words.toList)
 
-  def groupByLetters(words: List[String]): Map[Set[Char], List[String]] = {
-    words.groupBy(makeKey)
-  }
-
-  def makeKey(word: String) = {
+  def makeKey(word: String): Set[Char] = {
     word.toLowerCase.toCharArray.toSet
   }
 
